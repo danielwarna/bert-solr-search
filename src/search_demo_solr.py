@@ -104,9 +104,9 @@ if button_clicked or query != "":
         elif measure == "dot product (unbounded)":
             cosine = "false"
         query = {
-            "q": '{!vp f=vector vector="' + get_solr_vector_search(bc, query) + '" cosine=' + cosine + '}',
+            "q": '{!vp f=vector vector="' + get_solr_vector_search("bc", query) + '" cosine=' + cosine + '}',
             "wt": "json",
-            "fl": "id,_text_,url,score",
+            "fl": "id,_text_,url,score,vector",
             "rows": n
 
         }
@@ -114,12 +114,16 @@ if button_clicked or query != "":
         query = {
             "q": query,
             "wt": "json",
-            "fl": "id,_text_,url,score",
+            "fl": "id,_text_,url,score,vector",
             "rows": n
 
         }
     with st.spinner(text="Searching..."):
         docs, query_time, numfound = sc.query("vector", query)
+
+        if diversification_method:
+            docs = diversify(docs, diversification_method)
+
     st.success("Done!")
 
     st.write("Query time: {} ms".format(query_time))
